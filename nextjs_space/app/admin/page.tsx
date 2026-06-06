@@ -451,9 +451,9 @@ export default function AdminPage() {
                         try {
                           const ext = file.name.split('.').pop()
                           const fileName = `produto-${Date.now()}.${ext}`
-                          const { error } = await supabase.storage.from('produtos').upload(fileName, file, { upsert: true })
+                          const { error } = await supabase.storage.from('Produtos').upload(fileName, file, { upsert: true })
                           if (error) throw error
-                          const { data } = supabase.storage.from('produtos').getPublicUrl(fileName)
+                          const { data } = supabase.storage.from('Produtos').getPublicUrl(fileName)
                           setEditProduct(p => ({ ...p, image: data.publicUrl }))
                         } catch { setToast({ message: 'Erro ao fazer upload.', type: 'error' }) }
                         finally { setUploadingImage(false) }
@@ -470,9 +470,9 @@ export default function AdminPage() {
                         try {
                           const ext = file.name.split('.').pop()
                           const fileName = `produto-${Date.now()}.${ext}`
-                          const { error } = await supabase.storage.from('produtos').upload(fileName, file, { upsert: true })
+                          const { error } = await supabase.storage.from('Produtos').upload(fileName, file, { upsert: true })
                           if (error) throw error
-                          const { data } = supabase.storage.from('produtos').getPublicUrl(fileName)
+                          const { data } = supabase.storage.from('Produtos').getPublicUrl(fileName)
                           setEditProduct(p => ({ ...p, image: data.publicUrl }))
                         } catch { setToast({ message: 'Erro ao fazer upload.', type: 'error' }) }
                         finally { setUploadingImage(false) }
