@@ -30,6 +30,7 @@ export default function AdminPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loginError, setLoginError] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [tab, setTab] = useState<'products' | 'categories'>('products')
   const [products, setProducts] = useState<Product[]>([])
   const [categories, setCategories] = useState<Category[]>([])
@@ -45,6 +46,8 @@ export default function AdminPage() {
   // Modal categoria
   const [showCatModal, setShowCatModal] = useState(false)
   const [newCatLabel, setNewCatLabel] = useState('')
+  const [editingCatId, setEditingCatId] = useState<string | null>(null)
+  const [editingCatLabel, setEditingCatLabel] = useState('')
   const [savingCat, setSavingCat] = useState(false)
 
   useEffect(() => {
@@ -150,7 +153,14 @@ export default function AdminPage() {
     setSavingCat(false)
     fetchData()
   }
-
+  async function updateCategory(id: string) {
+  if (!editingCatLabel.trim()) return
+  await supabase.from('categories').update({ label: editingCatLabel.trim() }).eq('id', id)
+  setToast({ message: 'Categoria atualizada!', type: 'success' })
+  setEditingCatId(null)
+  setEditingCatLabel('')
+  fetchData()
+}
   async function deleteCategory(id: string) {
     if (!confirm('Excluir esta categoria? Os produtos nela não serão apagados.')) return
     await supabase.from('categories').delete().eq('id', id)
@@ -185,14 +195,24 @@ export default function AdminPage() {
             </div>
             <div>
               <label className="text-gray-400 text-sm mb-1 block">Senha</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-                className="w-full bg-gray-800 text-white rounded-xl px-4 py-3 text-sm border border-gray-700 focus:outline-none focus:border-yellow-400"
-                placeholder="••••••••"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+                  className="w-full bg-gray-800 text-white rounded-xl px-4 py-3 pr-12 text-sm border border-gray-700 focus:outline-none focus:border-yellow-400"
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(v => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
             {loginError && (
               <p className="text-red-400 text-sm flex items-center gap-1">
@@ -380,12 +400,45 @@ export default function AdminPage() {
                       <span className="font-medium">{cat.label}</span>
                       <span className="text-gray-600 text-xs">#{cat.id}</span>
                     </div>
-                    <button
-                      onClick={() => deleteCategory(cat.id)}
-                      className="p-1.5 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors"
-                    >
-                      <Trash2 size={14} />
-                    </button>
+                    {editingCatId === cat.id ? (
+  <div className="flex items-center gap-2">
+    <input
+      type="text"
+      value={editingCatLabel}
+      onChange={(e) => setEditingCatLabel(e.target.value)}
+      onKeyDown={(e) => e.key === 'Enter' && updateCategory(cat.id)}
+      className="bg-gray-800 text-white rounded-lg px-3 py-1 text-sm border border-yellow-400 focus:outline-none"
+      autoFocus
+    />
+    <button
+      onClick={() => updateCategory(cat.id)}
+      className="p-1.5 rounded-lg bg-green-500/20 text-green-400 hover:bg-green-500/30 transition-colors"
+    >
+      <Save size={14} />
+    </button>
+    <button
+      onClick={() => setEditingCatId(null)}
+      className="p-1.5 rounded-lg bg-gray-700 text-gray-400 hover:bg-gray-600 transition-colors"
+    >
+      <X size={14} />
+    </button>
+  </div>
+) : (
+  <div className="flex items-center gap-2">
+    <button
+      onClick={() => { setEditingCatId(cat.id); setEditingCatLabel(cat.label) }}
+      className="p-1.5 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors"
+    >
+      <Save size={14} />
+    </button>
+    <button
+      onClick={() => deleteCategory(cat.id)}
+      className="p-1.5 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors"
+    >
+      <Trash2 size={14} />
+    </button>
+  </div>
+)}
                   </div>
                 ))}
               </div>
@@ -500,7 +553,7 @@ export default function AdminPage() {
                   onChange={(e) => setEditProduct(p => ({ ...p, category_id: e.target.value }))}
                   className="w-full bg-gray-800 text-white rounded-xl px-4 py-2.5 text-sm border border-gray-700 focus:outline-none focus:border-yellow-400"
                 >
-                  <option value="">Sem categoria</option>
+                  
                   {categories.map(cat => (
                     <option key={cat.id} value={cat.id}>{cat.label}</option>
                   ))}
