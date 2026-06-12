@@ -10,7 +10,7 @@ import { supabase } from '@/lib/supabase'
 
 export function ProductsSection() {
   const [search, setSearch] = useState('')
-  const [activeCategory, setActiveCategory] = useState('todos')
+  const [activeCategory, setActiveCategory] = useState('')
   const [products, setProducts] = useState<any[]>([])
   const [categories, setCategories] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -42,13 +42,12 @@ export function ProductsSection() {
   }, [])
 
   const allCategories = useMemo(() => [
-    { id: 'todos', label: 'Todos', icon: 'LayoutGrid' },
     ...categories,
   ], [categories])
 
   const filtered = useMemo(() => {
     return products.filter((p) => {
-      const matchesCategory = activeCategory === 'todos' || p.category_id === activeCategory
+      const matchesCategory = !activeCategory || p.category_id === activeCategory
       const matchesSearch = !search ||
         p.name?.toLowerCase().includes(search.toLowerCase()) ||
         p.description?.toLowerCase().includes(search.toLowerCase())
@@ -119,6 +118,13 @@ export function ProductsSection() {
               <ProductCard key={product.id} product={product} index={index} />
             ))}
           </div>
+              ) : !activeCategory ? (
+          <FadeIn>
+            <div className="text-center py-16">
+              <LayoutGrid size={48} className="mx-auto text-gray-300 mb-4" />
+              <p className="text-gray-500 text-lg">Selecione uma categoria para ver os produtos.</p>
+            </div>
+          </FadeIn>
         ) : (
           <FadeIn>
             <div className="text-center py-16">
