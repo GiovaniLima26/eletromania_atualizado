@@ -47,7 +47,7 @@ export function ProductsSection() {
 
   const filtered = useMemo(() => {
     return products.filter((p) => {
-      const matchesCategory = !activeCategory || p.category_id === activeCategory
+      const matchesCategory = activeCategory !== '' && p.category_id === activeCategory
       const matchesSearch = !search ||
         p.name?.toLowerCase().includes(search.toLowerCase()) ||
         p.description?.toLowerCase().includes(search.toLowerCase())
