@@ -45,15 +45,22 @@ export function ProductsSection() {
     ...categories,
   ], [categories])
 
-  const filtered = useMemo(() => {
-    return products.filter((p) => {
-      const matchesCategory = activeCategory !== '' && p.category_id === activeCategory
-      const matchesSearch = !search ||
-        p.name?.toLowerCase().includes(search.toLowerCase()) ||
-        p.description?.toLowerCase().includes(search.toLowerCase())
-      return matchesCategory && matchesSearch
-    })
-  }, [search, activeCategory, products])
+  function normalize(str: string) {
+  return str
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+}
+
+const filtered = useMemo(() => {
+  return products.filter((p) => {
+    const matchesCategory = activeCategory !== '' && p.category_id === activeCategory
+    const matchesSearch = !search ||
+      normalize(p.name || '').includes(normalize(search)) ||
+      normalize(p.description || '').includes(normalize(search))
+    return matchesCategory && matchesSearch
+  })
+}, [search, activeCategory, products])
 
   return (
     <Section id="produtos" className="bg-gradient-to-b from-white to-amber-50/50">
