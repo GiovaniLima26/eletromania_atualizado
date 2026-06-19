@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { isAdminLoggedIn, checkAdminCredentials, setAdminSession, clearAdminSession } from '@/lib/auth'
+import { isAdminLoggedIn, setAdminSession, clearAdminSession } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 import { 
   LogOut, Plus, Trash2, Eye, EyeOff, Tag, Package, 
@@ -76,13 +76,23 @@ export default function AdminPage() {
     setLoading(false)
   }
 
-  function handleLogin() {
-    if (checkAdminCredentials(email, password)) {
-      setAdminSession()
-      setLoggedIn(true)
-      setLoginError('')
-    } else {
-      setLoginError('E-mail ou senha incorretos.')
+  async function handleLogin() {
+    setLoginError('')
+    try {
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        setAdminSession()
+        setLoggedIn(true)
+      } else {
+        setLoginError('E-mail ou senha incorretos.')
+      }
+    } catch {
+      setLoginError('Erro ao tentar entrar. Tente novamente.')
     }
   }
 

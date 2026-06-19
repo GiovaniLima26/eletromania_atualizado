@@ -1,9 +1,4 @@
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'eletromaniadistribuidora@gmail.com'
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Eletro@2025'
-
-export function checkAdminCredentials(email: string, password: string): boolean {
-  return email === ADMIN_EMAIL && password === ADMIN_PASSWORD
-}
+// A verificação de email/senha acontece no servidor, em /api/admin/login.
 
 export function setAdminSession() {
   if (typeof window !== 'undefined') {
