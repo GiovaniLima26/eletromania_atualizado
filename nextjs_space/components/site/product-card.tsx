@@ -17,10 +17,18 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, index }: ProductCardProps) {
+  function saveScrollPosition() {
+    try {
+      sessionStorage.setItem('eletromania:scroll', String(window.scrollY))
+    } catch (e) {
+      console.error('Erro ao salvar scroll:', e)
+    }
+  }
+
   return (
     <FadeIn delay={index * 0.05}>
       <div className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 hover:border-yellow-300 flex flex-col h-full">
-        <Link href={`/produto/${product.id}`} className="block">
+        <Link href={`/produto/${product.id}`} className="block" onClick={saveScrollPosition}>
           {/* Image */}
           <div className="relative aspect-square overflow-hidden bg-gray-50">
             {product.image ? (
@@ -42,7 +50,7 @@ export function ProductCard({ product, index }: ProductCardProps) {
 
         {/* Content */}
         <div className="p-4 flex flex-col flex-1">
-          <Link href={`/produto/${product.id}`} className="block">
+          <Link href={`/produto/${product.id}`} className="block" onClick={saveScrollPosition}>
             <h3 className="font-display font-bold text-gray-900 text-base mb-1 line-clamp-2 hover:text-yellow-600 transition-colors">
               {product.name}
             </h3>

@@ -63,7 +63,7 @@ export default function ProductPage() {
           Esse produto pode não estar mais disponível.
         </p>
         <button
-          onClick={() => router.push('/')}
+          onClick={() => router.back()}
           className="inline-flex items-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold py-2.5 px-5 rounded-xl transition-colors"
         >
           <ArrowLeft size={18} />
@@ -77,7 +77,7 @@ export default function ProductPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-3xl mx-auto px-4 py-4 sm:py-8">
         <button
-          onClick={() => router.push('/')}
+          onClick={() => router.back()}
           className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 font-medium mb-4 transition-colors"
         >
           <ArrowLeft size={18} />

@@ -316,33 +316,35 @@ export default function AdminPage() {
                 <p className="text-sm mt-1">Clique em "Novo Produto" para começar.</p>
               </div>
             ) : (
-              <div className="grid gap-4">
+              <div className="grid gap-4 min-w-0">
                 {products.map((product) => {
                   const cat = categories.find(c => c.id === product.category_id)
                   return (
-                    <div key={product.id} className={`bg-gray-900 rounded-xl p-4 border flex items-center gap-4 ${
+                    <div key={product.id} className={`bg-gray-900 rounded-xl p-4 border flex flex-col sm:flex-row sm:items-center gap-4 w-full min-w-0 ${
                       product.visible ? 'border-gray-800' : 'border-gray-800 opacity-60'
                     }`}>
-                      {product.image ? (
-                        <img src={product.image} alt={product.name} className="w-16 h-16 rounded-lg object-cover flex-shrink-0" 
-                          onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/64x64/FFC107/333?text=?' }} />
-                      ) : (
-                        <div className="w-16 h-16 rounded-lg bg-gray-800 flex items-center justify-center flex-shrink-0">
-                          <Package size={24} className="text-gray-600" />
+                      <div className="flex items-center gap-4 min-w-0 w-full sm:w-auto">
+                        {product.image ? (
+                          <img src={product.image} alt={product.name} className="w-16 h-16 rounded-lg object-cover flex-shrink-0" 
+                            onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/64x64/FFC107/333?text=?' }} />
+                        ) : (
+                          <div className="w-16 h-16 rounded-lg bg-gray-800 flex items-center justify-center flex-shrink-0">
+                            <Package size={24} className="text-gray-600" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-white truncate">{product.name || '(sem nome)'}</p>
+                          {product.description && (
+                            <p className="text-gray-500 text-sm truncate">{product.description}</p>
+                          )}
+                          {cat && (
+                            <span className="inline-block bg-yellow-500/20 text-yellow-400 text-xs px-2 py-0.5 rounded-full mt-1">
+                              {cat.label}
+                            </span>
+                          )}
                         </div>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-white truncate">{product.name || '(sem nome)'}</p>
-                        {product.description && (
-                          <p className="text-gray-500 text-sm truncate">{product.description}</p>
-                        )}
-                        {cat && (
-                          <span className="inline-block bg-yellow-500/20 text-yellow-400 text-xs px-2 py-0.5 rounded-full mt-1">
-                            {cat.label}
-                          </span>
-                        )}
                       </div>
-                      <div className="flex items-center gap-2 flex-shrink-0">
+                      <div className="flex items-center gap-2 flex-shrink-0 self-end sm:self-auto">
                         <button
                           onClick={() => toggleVisible(product)}
                           title={product.visible ? 'Ocultar' : 'Mostrar'}

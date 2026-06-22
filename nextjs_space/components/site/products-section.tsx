@@ -14,6 +14,115 @@ export function ProductsSection() {
   const [products, setProducts] = useState<any[]>([])
   const [categories, setCategories] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [restored, setRestored] = useState(false)
+
+  // Restaura o filtro de busca/categoria salvos ao montar o componente
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem('eletromania:filters')
+      if (saved) {
+        const { search: savedSearch, activeCategory: savedCategory } = JSON.parse(saved)
+        if (savedSearch) setSearch(savedSearch)
+        if (savedCategory) setActiveCategory(savedCategory)
+      }
+    } catch (e) {
+      console.error('Erro ao restaurar filtros:', e)
+    } finally {
+      setRestored(true)
+    }
+  }, [])
+
+  // Salva o filtro de busca/categoria sempre que mudar
+  useEffect(() => {
+    if (!restored) return
+    try {
+      sessionStorage.setItem('eletromania:filters', JSON.stringify({ search, activeCategory }))
+    } catch (e) {
+      console.error('Erro ao salvar filtros:', e)
+    }
+  }, [search, activeCategory, restored])
+
+  // Restaura a posição de scroll salva, depois que os produtos carregarem.
+  // Espera a altura da página parar de mudar (imagens/animações carregando)
+  // antes de restaurar, e faz isso só UMA vez — se o usuário rolar ou
+  // tocar na tela manualmente, cancela na hora pra não "brigar" com ele.
+  useEffect(() => {
+    if (loading) return
+    const savedScroll = sessionStorage.getItem('eletromania:scroll')
+    if (!savedScroll) return
+
+    sessionStorage.removeItem('eletromania:scroll')
+    const targetY = parseInt(savedScroll, 10)
+
+    let cancelled = false
+    let lastHeight = document.documentElement.scrollHeight
+    let stableCount = 0
+    let checkInterval: ReturnType<typeof setInterval>
+
+    function cancel() {
+      cancelled = true
+      clearInterval(checkInterval)
+      window.removeEventListener('wheel', cancel)
+      window.removeEventListener('touchmove', cancel)
+      window.removeEventListener('keydown', onKeyDown)
+    }
+
+    function onKeyDown(e: KeyboardEvent) {
+      if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(e.key)) {
+        cancel()
+      }
+    }
+
+    // Cancela se o usuário tentar rolar manualmente enquanto esperamos
+    window.addEventListener('wheel', cancel, { passive: true })
+    window.addEventListener('touchmove', cancel, { passive: true })
+    window.addEventListener('keydown', onKeyDown)
+
+    checkInterval = setInterval(() => {
+      if (cancelled) return
+
+      const currentHeight = document.documentElement.scrollHeight
+      if (currentHeight === lastHeight) {
+        stableCount++
+      } else {
+        stableCount = 0
+        lastHeight = currentHeight
+      }
+
+      // Altura estável por 2 checagens seguidas (200ms) = layout pronto
+      if (stableCount >= 2) {
+        window.scrollTo({ top: targetY, behavior: 'auto' })
+        cancel()
+      }
+    }, 100)
+
+    // Limite de segurança: para de tentar depois de 2 segundos
+    const timeout = setTimeout(cancel, 2000)
+
+    return () => {
+      cancel()
+      clearTimeout(timeout)
+    }
+  }, [loading])
+
+  // Salva a posição de scroll ao fechar/recarregar a aba.
+  // (A navegação para a página de produto já é coberta pelo onClick
+  // dentro do ProductCard — não duplicar aqui no cleanup, pois o cleanup
+  // roda DEPOIS que a nova página já montou e o scroll já é 0, o que
+  // sobrescreveria o valor certo com zero.)
+  useEffect(() => {
+    function saveScroll() {
+      try {
+        sessionStorage.setItem('eletromania:scroll', String(window.scrollY))
+      } catch (e) {
+        console.error('Erro ao salvar scroll:', e)
+      }
+    }
+    window.addEventListener('beforeunload', saveScroll)
+    return () => {
+      window.removeEventListener('beforeunload', saveScroll)
+    }
+  }, [])
 
   useEffect(() => {
     async function fetchData() {
